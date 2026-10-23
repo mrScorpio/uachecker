@@ -1,0 +1,20 @@
+syntax = "proto3";
+
+package uadata;
+option go_package = "./uadata";
+
+service UaService {
+    rpc GetData (SrvRequest) returns (SrvResponse);
+}
+
+message SrvRequest {
+    int32 wd = 1;
+    repeated float v = 2;
+    repeated string tags = 3;
+    repeated bytes raw = 4;
+}
+
+message SrvResponse {
+    int32 wd = 1;
+    repeated bytes data = 2;
+}
