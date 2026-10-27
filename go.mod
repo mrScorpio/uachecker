@@ -1,10 +1,11 @@
 module github.com/mrscorpio/uachecker
 
-go 1.25.10
+go 1.26
 
 replace uadata => ./uadata
 
 require (
+	github.com/influxdata/influxdb v1.13.1
 	google.golang.org/grpc v1.84.0
 	uadata v0.0.0-00010101000000-000000000000
 )

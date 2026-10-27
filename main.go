@@ -9,6 +9,7 @@ import (
 
 	pb "uadata"
 
+	"github.com/mrscorpio/uachecker/pkg/influxdbold"
 	"github.com/mrscorpio/uahelper/pkg/tgbot"
 	"google.golang.org/grpc"
 )
@@ -16,9 +17,12 @@ import (
 type uaServiceServer struct {
 	pb.UnimplementedUaServiceServer
 
-	Vals     map[string]float32
+	Vals     map[string]any
 	Tagnames []string
 	Wd       int32
+	Alive    bool
+
+	DbCl *influxdbold.InfluxCl
 }
 
 func (s *uaServiceServer) GetData(ctx context.Context, req *pb.SrvRequest) (*pb.SrvResponse, error) {
@@ -28,7 +32,13 @@ func (s *uaServiceServer) GetData(ctx context.Context, req *pb.SrvRequest) (*pb.
 		for i, v := range s.Tagnames {
 			s.Vals[v] = req.V[i]
 		}
-		if s.Wd%100 == 0 {
+		if s.DbCl != nil {
+			err := s.DbCl.AddPoint(s.Vals)
+			if err != nil {
+				log.Println(err)
+			}
+		}
+		if s.Wd%666 == 0 {
 			log.Println(s.Vals)
 		}
 	}
@@ -47,9 +57,15 @@ func (s *uaServiceServer) GetData(ctx context.Context, req *pb.SrvRequest) (*pb.
 func main() {
 	ctx, cancel := context.WithCancel(context.Background())
 	defer cancel()
-	tgToken := os.Getenv("TGTOKEN")
+
 	tgBoss := os.Getenv("TGBOSS")
-	bot, err := tgbot.NewBot(ctx, tgToken, false)
+
+	bot, err := tgbot.NewBot(ctx, os.Getenv("TGTOKEN"), false)
+	if err != nil {
+		log.Println(err)
+	}
+
+	dbCl, err := influxdbold.NewDbConn("http://localhost:8086", os.Getenv("INFLUX_USER"), os.Getenv("INFLUX_PASS"))
 	if err != nil {
 		log.Println(err)
 	}
@@ -58,10 +74,10 @@ func main() {
 	if err != nil {
 		log.Fatalln(err)
 	}
-	vals := make(map[string]float32)
+	vals := make(map[string]any)
 	tagnames := make([]string, 0)
 	grpcServ := grpc.NewServer()
-	uaServ := &uaServiceServer{Vals: vals, Tagnames: tagnames}
+	uaServ := &uaServiceServer{Vals: vals, Tagnames: tagnames, DbCl: dbCl}
 	pb.RegisterUaServiceServer(grpcServ, uaServ)
 	log.Println(net.InterfaceAddrs())
 
@@ -69,7 +85,7 @@ func main() {
 		for {
 			wdBuf := uaServ.Wd
 			time.Sleep(22 * time.Second)
-			if uaServ.Wd == wdBuf {
+			if uaServ.Wd == wdBuf && uaServ.Alive {
 				if bot != nil {
 					err := bot.SendTxt("логер вырубился", tgBoss)
 					if err != nil {
@@ -77,10 +93,20 @@ func main() {
 					}
 				}
 				log.Println("uahelper is dead, last wd =", uaServ.Wd)
-				break
+				uaServ.Alive = false
+			}
+			if uaServ.Wd != wdBuf {
+				uaServ.Alive = true
 			}
 		}
 	}()
+
+	if bot != nil {
+		err := bot.SendTxt("uachecker is ok", tgBoss)
+		if err != nil {
+			log.Println(err)
+		}
+	}
 
 	if err := grpcServ.Serve(listener); err != nil {
 		log.Fatalln(err)
