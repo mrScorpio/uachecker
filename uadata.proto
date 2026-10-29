@@ -5,16 +5,27 @@ option go_package = "./uadata";
 
 service UaService {
     rpc GetData (SrvRequest) returns (SrvResponse);
+    rpc SendTg (ToTelegram) returns (TelegramResponse);
 }
 
 message SrvRequest {
     int32 wd = 1;
-    repeated float v = 2;
-    repeated string tags = 3;
-    repeated bytes raw = 4;
+    string tm = 2;
+    repeated float v = 3;
+    repeated string tags = 4;
+    repeated bytes raw = 5;
 }
 
 message SrvResponse {
     int32 wd = 1;
     repeated bytes data = 2;
+}
+
+message ToTelegram {
+    string mes = 1;
+    string chatId = 2;
+}
+
+message TelegramResponse {
+    string er = 1;
 }

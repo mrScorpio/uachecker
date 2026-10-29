@@ -22,7 +22,8 @@ type uaServiceServer struct {
 	Wd       int32
 	Alive    bool
 
-	DbCl *influxdbold.InfluxCl
+	DbCl  *influxdbold.InfluxCl
+	TgBot *tgbot.TgBot
 }
 
 func (s *uaServiceServer) GetData(ctx context.Context, req *pb.SrvRequest) (*pb.SrvResponse, error) {
@@ -33,7 +34,12 @@ func (s *uaServiceServer) GetData(ctx context.Context, req *pb.SrvRequest) (*pb.
 			s.Vals[v] = req.V[i]
 		}
 		if s.DbCl != nil {
-			err := s.DbCl.AddPoint(s.Vals)
+			tm, err := time.Parse("2006-01-02 15:04:05.000 -07", req.Tm)
+			if err != nil {
+				log.Println(err)
+			}
+
+			err = s.DbCl.AddPoint(s.Vals, tm)
 			if err != nil {
 				log.Println(err)
 			}
@@ -52,6 +58,18 @@ func (s *uaServiceServer) GetData(ctx context.Context, req *pb.SrvRequest) (*pb.
 	return &pb.SrvResponse{
 		Wd: req.Wd + 66,
 	}, nil
+}
+
+func (s *uaServiceServer) SendTg(ctx context.Context, req *pb.ToTelegram) (*pb.TelegramResponse, error) {
+	var err error
+	if s.TgBot != nil {
+		err = s.TgBot.SendTxt(req.Mes, req.ChatId)
+		if err != nil {
+			return &pb.TelegramResponse{Er: err.Error()}, err
+		}
+		return &pb.TelegramResponse{Er: "message sent"}, nil
+	}
+	return &pb.TelegramResponse{Er: "telegram bot is nil"}, nil
 }
 
 func main() {
@@ -77,7 +95,7 @@ func main() {
 	vals := make(map[string]any)
 	tagnames := make([]string, 0)
 	grpcServ := grpc.NewServer()
-	uaServ := &uaServiceServer{Vals: vals, Tagnames: tagnames, DbCl: dbCl}
+	uaServ := &uaServiceServer{Vals: vals, Tagnames: tagnames, DbCl: dbCl, TgBot: bot}
 	pb.RegisterUaServiceServer(grpcServ, uaServ)
 	log.Println(net.InterfaceAddrs())
 
@@ -95,18 +113,17 @@ func main() {
 				log.Println("uahelper is dead, last wd =", uaServ.Wd)
 				uaServ.Alive = false
 			}
-			if uaServ.Wd != wdBuf {
+			if uaServ.Wd != wdBuf && !uaServ.Alive {
 				uaServ.Alive = true
+				if bot != nil {
+					err := bot.SendTxt("логер в строю", tgBoss)
+					if err != nil {
+						log.Println(err)
+					}
+				}
 			}
 		}
 	}()
-
-	if bot != nil {
-		err := bot.SendTxt("uachecker is ok", tgBoss)
-		if err != nil {
-			log.Println(err)
-		}
-	}
 
 	if err := grpcServ.Serve(listener); err != nil {
 		log.Fatalln(err)

@@ -20,6 +20,7 @@ const _ = grpc.SupportPackageIsVersion9
 
 const (
 	UaService_GetData_FullMethodName = "/uadata.UaService/GetData"
+	UaService_SendTg_FullMethodName  = "/uadata.UaService/SendTg"
 )
 
 // UaServiceClient is the client API for UaService service.
@@ -27,6 +28,7 @@ const (
 // For semantics around ctx use and closing/ending streaming RPCs, please refer to https://pkg.go.dev/google.golang.org/grpc/?tab=doc#ClientConn.NewStream.
 type UaServiceClient interface {
 	GetData(ctx context.Context, in *SrvRequest, opts ...grpc.CallOption) (*SrvResponse, error)
+	SendTg(ctx context.Context, in *ToTelegram, opts ...grpc.CallOption) (*TelegramResponse, error)
 }
 
 type uaServiceClient struct {
@@ -47,11 +49,22 @@ func (c *uaServiceClient) GetData(ctx context.Context, in *SrvRequest, opts ...g
 	return out, nil
 }
 
+func (c *uaServiceClient) SendTg(ctx context.Context, in *ToTelegram, opts ...grpc.CallOption) (*TelegramResponse, error) {
+	cOpts := append([]grpc.CallOption{grpc.StaticMethod()}, opts...)
+	out := new(TelegramResponse)
+	err := c.cc.Invoke(ctx, UaService_SendTg_FullMethodName, in, out, cOpts...)
+	if err != nil {
+		return nil, err
+	}
+	return out, nil
+}
+
 // UaServiceServer is the server API for UaService service.
 // All implementations must embed UnimplementedUaServiceServer
 // for forward compatibility.
 type UaServiceServer interface {
 	GetData(context.Context, *SrvRequest) (*SrvResponse, error)
+	SendTg(context.Context, *ToTelegram) (*TelegramResponse, error)
 	mustEmbedUnimplementedUaServiceServer()
 }
 
@@ -64,6 +77,9 @@ type UnimplementedUaServiceServer struct{}
 
 func (UnimplementedUaServiceServer) GetData(context.Context, *SrvRequest) (*SrvResponse, error) {
 	return nil, status.Error(codes.Unimplemented, "method GetData not implemented")
+}
+func (UnimplementedUaServiceServer) SendTg(context.Context, *ToTelegram) (*TelegramResponse, error) {
+	return nil, status.Error(codes.Unimplemented, "method SendTg not implemented")
 }
 func (UnimplementedUaServiceServer) mustEmbedUnimplementedUaServiceServer() {}
 func (UnimplementedUaServiceServer) testEmbeddedByValue()                   {}
@@ -104,6 +120,24 @@ func _UaService_GetData_Handler(srv interface{}, ctx context.Context, dec func(i
 	return interceptor(ctx, in, info, handler)
 }
 
+func _UaService_SendTg_Handler(srv interface{}, ctx context.Context, dec func(interface{}) error, interceptor grpc.UnaryServerInterceptor) (interface{}, error) {
+	in := new(ToTelegram)
+	if err := dec(in); err != nil {
+		return nil, err
+	}
+	if interceptor == nil {
+		return srv.(UaServiceServer).SendTg(ctx, in)
+	}
+	info := &grpc.UnaryServerInfo{
+		Server:     srv,
+		FullMethod: UaService_SendTg_FullMethodName,
+	}
+	handler := func(ctx context.Context, req interface{}) (interface{}, error) {
+		return srv.(UaServiceServer).SendTg(ctx, req.(*ToTelegram))
+	}
+	return interceptor(ctx, in, info, handler)
+}
+
 // UaService_ServiceDesc is the grpc.ServiceDesc for UaService service.
 // It's only intended for direct use with grpc.RegisterService,
 // and not to be introspected or modified (even as a copy)
@@ -114,6 +148,10 @@ var UaService_ServiceDesc = grpc.ServiceDesc{
 		{
 			MethodName: "GetData",
 			Handler:    _UaService_GetData_Handler,
+		},
+		{
+			MethodName: "SendTg",
+			Handler:    _UaService_SendTg_Handler,
 		},
 	},
 	Streams:  []grpc.StreamDesc{},

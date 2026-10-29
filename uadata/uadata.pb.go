@@ -24,9 +24,10 @@ const (
 type SrvRequest struct {
 	state         protoimpl.MessageState `protogen:"open.v1"`
 	Wd            int32                  `protobuf:"varint,1,opt,name=wd,proto3" json:"wd,omitempty"`
-	V             []float32              `protobuf:"fixed32,2,rep,packed,name=v,proto3" json:"v,omitempty"`
-	Tags          []string               `protobuf:"bytes,3,rep,name=tags,proto3" json:"tags,omitempty"`
-	Raw           [][]byte               `protobuf:"bytes,4,rep,name=raw,proto3" json:"raw,omitempty"`
+	Tm            string                 `protobuf:"bytes,2,opt,name=tm,proto3" json:"tm,omitempty"`
+	V             []float32              `protobuf:"fixed32,3,rep,packed,name=v,proto3" json:"v,omitempty"`
+	Tags          []string               `protobuf:"bytes,4,rep,name=tags,proto3" json:"tags,omitempty"`
+	Raw           [][]byte               `protobuf:"bytes,5,rep,name=raw,proto3" json:"raw,omitempty"`
 	unknownFields protoimpl.UnknownFields
 	sizeCache     protoimpl.SizeCache
 }
@@ -66,6 +67,13 @@ func (x *SrvRequest) GetWd() int32 {
 		return x.Wd
 	}
 	return 0
+}
+
+func (x *SrvRequest) GetTm() string {
+	if x != nil {
+		return x.Tm
+	}
+	return ""
 }
 
 func (x *SrvRequest) GetV() []float32 {
@@ -141,22 +149,126 @@ func (x *SrvResponse) GetData() [][]byte {
 	return nil
 }
 
+type ToTelegram struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Mes           string                 `protobuf:"bytes,1,opt,name=mes,proto3" json:"mes,omitempty"`
+	ChatId        string                 `protobuf:"bytes,2,opt,name=chatId,proto3" json:"chatId,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *ToTelegram) Reset() {
+	*x = ToTelegram{}
+	mi := &file_uadata_proto_msgTypes[2]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *ToTelegram) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*ToTelegram) ProtoMessage() {}
+
+func (x *ToTelegram) ProtoReflect() protoreflect.Message {
+	mi := &file_uadata_proto_msgTypes[2]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use ToTelegram.ProtoReflect.Descriptor instead.
+func (*ToTelegram) Descriptor() ([]byte, []int) {
+	return file_uadata_proto_rawDescGZIP(), []int{2}
+}
+
+func (x *ToTelegram) GetMes() string {
+	if x != nil {
+		return x.Mes
+	}
+	return ""
+}
+
+func (x *ToTelegram) GetChatId() string {
+	if x != nil {
+		return x.ChatId
+	}
+	return ""
+}
+
+type TelegramResponse struct {
+	state         protoimpl.MessageState `protogen:"open.v1"`
+	Er            string                 `protobuf:"bytes,1,opt,name=er,proto3" json:"er,omitempty"`
+	unknownFields protoimpl.UnknownFields
+	sizeCache     protoimpl.SizeCache
+}
+
+func (x *TelegramResponse) Reset() {
+	*x = TelegramResponse{}
+	mi := &file_uadata_proto_msgTypes[3]
+	ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+	ms.StoreMessageInfo(mi)
+}
+
+func (x *TelegramResponse) String() string {
+	return protoimpl.X.MessageStringOf(x)
+}
+
+func (*TelegramResponse) ProtoMessage() {}
+
+func (x *TelegramResponse) ProtoReflect() protoreflect.Message {
+	mi := &file_uadata_proto_msgTypes[3]
+	if x != nil {
+		ms := protoimpl.X.MessageStateOf(protoimpl.Pointer(x))
+		if ms.LoadMessageInfo() == nil {
+			ms.StoreMessageInfo(mi)
+		}
+		return ms
+	}
+	return mi.MessageOf(x)
+}
+
+// Deprecated: Use TelegramResponse.ProtoReflect.Descriptor instead.
+func (*TelegramResponse) Descriptor() ([]byte, []int) {
+	return file_uadata_proto_rawDescGZIP(), []int{3}
+}
+
+func (x *TelegramResponse) GetEr() string {
+	if x != nil {
+		return x.Er
+	}
+	return ""
+}
+
 var File_uadata_proto protoreflect.FileDescriptor
 
 const file_uadata_proto_rawDesc = "" +
 	"\n" +
-	"\fuadata.proto\x12\x06uadata\"P\n" +
+	"\fuadata.proto\x12\x06uadata\"`\n" +
 	"\n" +
 	"SrvRequest\x12\x0e\n" +
-	"\x02wd\x18\x01 \x01(\x05R\x02wd\x12\f\n" +
-	"\x01v\x18\x02 \x03(\x02R\x01v\x12\x12\n" +
-	"\x04tags\x18\x03 \x03(\tR\x04tags\x12\x10\n" +
-	"\x03raw\x18\x04 \x03(\fR\x03raw\"1\n" +
+	"\x02wd\x18\x01 \x01(\x05R\x02wd\x12\x0e\n" +
+	"\x02tm\x18\x02 \x01(\tR\x02tm\x12\f\n" +
+	"\x01v\x18\x03 \x03(\x02R\x01v\x12\x12\n" +
+	"\x04tags\x18\x04 \x03(\tR\x04tags\x12\x10\n" +
+	"\x03raw\x18\x05 \x03(\fR\x03raw\"1\n" +
 	"\vSrvResponse\x12\x0e\n" +
 	"\x02wd\x18\x01 \x01(\x05R\x02wd\x12\x12\n" +
-	"\x04data\x18\x02 \x03(\fR\x04data2?\n" +
+	"\x04data\x18\x02 \x03(\fR\x04data\"6\n" +
+	"\n" +
+	"ToTelegram\x12\x10\n" +
+	"\x03mes\x18\x01 \x01(\tR\x03mes\x12\x16\n" +
+	"\x06chatId\x18\x02 \x01(\tR\x06chatId\"\"\n" +
+	"\x10TelegramResponse\x12\x0e\n" +
+	"\x02er\x18\x01 \x01(\tR\x02er2w\n" +
 	"\tUaService\x122\n" +
-	"\aGetData\x12\x12.uadata.SrvRequest\x1a\x13.uadata.SrvResponseB\n" +
+	"\aGetData\x12\x12.uadata.SrvRequest\x1a\x13.uadata.SrvResponse\x126\n" +
+	"\x06SendTg\x12\x12.uadata.ToTelegram\x1a\x18.uadata.TelegramResponseB\n" +
 	"Z\b./uadatab\x06proto3"
 
 var (
@@ -171,16 +283,20 @@ func file_uadata_proto_rawDescGZIP() []byte {
 	return file_uadata_proto_rawDescData
 }
 
-var file_uadata_proto_msgTypes = make([]protoimpl.MessageInfo, 2)
+var file_uadata_proto_msgTypes = make([]protoimpl.MessageInfo, 4)
 var file_uadata_proto_goTypes = []any{
-	(*SrvRequest)(nil),  // 0: uadata.SrvRequest
-	(*SrvResponse)(nil), // 1: uadata.SrvResponse
+	(*SrvRequest)(nil),       // 0: uadata.SrvRequest
+	(*SrvResponse)(nil),      // 1: uadata.SrvResponse
+	(*ToTelegram)(nil),       // 2: uadata.ToTelegram
+	(*TelegramResponse)(nil), // 3: uadata.TelegramResponse
 }
 var file_uadata_proto_depIdxs = []int32{
 	0, // 0: uadata.UaService.GetData:input_type -> uadata.SrvRequest
-	1, // 1: uadata.UaService.GetData:output_type -> uadata.SrvResponse
-	1, // [1:2] is the sub-list for method output_type
-	0, // [0:1] is the sub-list for method input_type
+	2, // 1: uadata.UaService.SendTg:input_type -> uadata.ToTelegram
+	1, // 2: uadata.UaService.GetData:output_type -> uadata.SrvResponse
+	3, // 3: uadata.UaService.SendTg:output_type -> uadata.TelegramResponse
+	2, // [2:4] is the sub-list for method output_type
+	0, // [0:2] is the sub-list for method input_type
 	0, // [0:0] is the sub-list for extension type_name
 	0, // [0:0] is the sub-list for extension extendee
 	0, // [0:0] is the sub-list for field type_name
@@ -197,7 +313,7 @@ func file_uadata_proto_init() {
 			GoPackagePath: reflect.TypeOf(x{}).PkgPath(),
 			RawDescriptor: unsafe.Slice(unsafe.StringData(file_uadata_proto_rawDesc), len(file_uadata_proto_rawDesc)),
 			NumEnums:      0,
-			NumMessages:   2,
+			NumMessages:   4,
 			NumExtensions: 0,
 			NumServices:   1,
 		},

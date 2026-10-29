@@ -32,8 +32,8 @@ func NewDbConn(addr, user, pass string) (*InfluxCl, error) {
 	return &InfluxCl{Cl: cl, Bp: bp, Tags: map[string]string{"sys": "gtd"}}, nil
 }
 
-func (iCl *InfluxCl) AddPoint(p map[string]any) error {
-	pt, err := oldb.NewPoint("values", iCl.Tags, p, time.Now())
+func (iCl *InfluxCl) AddPoint(p map[string]any, tm time.Time) error {
+	pt, err := oldb.NewPoint("values", iCl.Tags, p, tm)
 	if err != nil {
 		return err
 	}
